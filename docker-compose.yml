@@ -1,4 +1,15 @@
 services:
+  db:
+    image: postgres:17
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build: ./backend
     container_name: fastapi
@@ -10,3 +21,8 @@ services:
     volumes:
       - ./backend:/app
     command: bash entrypoint.sh
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
