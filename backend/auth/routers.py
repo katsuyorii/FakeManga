@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.dependencies import get_db
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, JWTTokensSchema
-from .services import registration, authentication
+from .services import registration, authentication, logout
 
 
 auth_router = APIRouter(
@@ -21,3 +21,8 @@ async def registration_user(user_data: UserRegistrationSchema, db: AsyncSession 
 @auth_router.post('/login', response_model=JWTTokensSchema)
 async def login_user(user_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)):
     return await authentication(user_data, response, db)
+
+@auth_router.post('/logout')
+async def logout_user(response: Response):
+    await logout(response)
+    return {'message': 'Вы успешно вышли из системы!'}

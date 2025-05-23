@@ -53,3 +53,7 @@ async def authentication(user_data: UserLoginSchema, response: Response, db: Asy
     )
 
     return JWTTokensSchema(access_token=access_token, refresh_token=refresh_token)
+
+async def logout(response: Response) -> None:
+    response.delete_cookie(key='access_token')
+    response.delete_cookie(key='refresh_token')
