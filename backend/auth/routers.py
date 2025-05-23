@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.dependencies import get_db
 
-from .schemas import UserRegistrationSchema
-from .services import registration
+from .schemas import UserRegistrationSchema, UserLoginSchema, JWTTokensSchema
+from .services import registration, authentication
 
 
 auth_router = APIRouter(
@@ -17,3 +17,7 @@ auth_router = APIRouter(
 async def registration_user(user_data: UserRegistrationSchema, db: AsyncSession = Depends(get_db)):
     await registration(user_data, db)
     return {'message': 'Пользователь успешно зарегестрирован в системе!'}
+
+@auth_router.post('/login', response_model=JWTTokensSchema)
+async def login_user(user_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)):
+    return await authentication(user_data, response, db)

@@ -3,6 +3,10 @@ import re
 from pydantic import BaseModel, EmailStr, field_validator
 
 
+class JWTTokensSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+
 class UserRegistrationSchema(BaseModel):
     email: EmailStr
     password: str
@@ -16,3 +20,7 @@ class UserRegistrationSchema(BaseModel):
             raise ValueError('Пароль должен содержать минимум 1 букву, 1 цифру и 1 специальный символ и быть не менее 8 символов!')
     
         return value
+
+class UserLoginSchema(BaseModel):
+    email: EmailStr
+    password: str
