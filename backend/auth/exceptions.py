@@ -4,3 +4,9 @@ from fastapi import HTTPException, status
 EMAIL_ALREADY_REGISTERED =  HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Данный адрес электронной почты уже зарегестрирован в системе!")
 
 INCORRECT_LOGIN_OR_PASSWORD = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неправильный логин или пароль!')
+
+EXPIRED_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Время действия токена истекло!')
+
+INVALID_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неверный токен!')
+
+MISSING_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Отсутствует refresh токен!')
