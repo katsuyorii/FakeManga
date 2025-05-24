@@ -7,7 +7,7 @@ from src.config import settings
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, JWTTokensSchema
 from .utils import get_user_by_email, get_user_by_id, hashing_password, verify_password, create_access_token, create_refresh_token, verify_jwt_token
-from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN
+from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE
 
 
 async def registration(user_data: UserRegistrationSchema, db: AsyncSession) -> None:
@@ -30,6 +30,9 @@ async def authentication(user_data: UserLoginSchema, response: Response, db: Asy
 
     if not user or not await verify_password(user_data.password, user.password):
         raise INCORRECT_LOGIN_OR_PASSWORD
+    
+    if not user.is_active:
+        raise USER_ACCOUNT_IS_INACTIVE
     
     access_token = await create_access_token({'sub': str(user.id), 'role': user.role}, response)
     refresh_token = await create_refresh_token({'sub': str(user.id)}, response)

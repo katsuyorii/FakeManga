@@ -5,6 +5,8 @@ EMAIL_ALREADY_REGISTERED =  HTTPException(status_code=status.HTTP_400_BAD_REQUES
 
 INCORRECT_LOGIN_OR_PASSWORD = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неправильный логин или пароль!')
 
+USER_ACCOUNT_IS_INACTIVE = HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Учетная запись пользователя неактивна!')
+
 EXPIRED_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Время действия токена истекло!')
 
 INVALID_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неверный токен!')
