@@ -6,6 +6,8 @@ from fastapi import Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from redis.asyncio import Redis
+
 from datetime import datetime, timezone, timedelta
 
 from users.models import UserModel
@@ -78,3 +80,10 @@ def verify_jwt_token(token: str) -> dict:
         raise INVALID_JWT_TOKEN
     
     return payload
+
+async def set_token_to_blacklist(redis: Redis, token: str, expire_seconds: int) -> None:
+    key = f'bl:{token}'
+    await redis.set(key, 'true', ex=expire_seconds)
+
+async def is_token_to_blacklist(redis: Redis, token: str) -> bool:
+    return await redis.exists(f'bl:{token}')
