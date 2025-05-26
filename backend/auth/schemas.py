@@ -3,9 +3,9 @@ import re
 from pydantic import BaseModel, EmailStr, field_validator
 
 
-class JWTTokensSchema(BaseModel):
+class AccessTokenResponseSchema(BaseModel):
     access_token: str
-    refresh_token: str
+    type: str = 'bearer'
 
 class UserRegistrationSchema(BaseModel):
     email: EmailStr
