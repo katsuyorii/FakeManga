@@ -9,6 +9,15 @@ services:
       - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
+  cache:
+    image: redis:8
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
 
   backend:
     build: ./backend
@@ -23,6 +32,7 @@ services:
     command: bash entrypoint.sh
     depends_on:
       - db
+      - cache
 
 volumes:
   postgres_data:
