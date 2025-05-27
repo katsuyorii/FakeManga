@@ -18,6 +18,10 @@ services:
       - "6379:6379"
     env_file:
       - .env
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
   backend:
     build: ./backend
@@ -36,3 +40,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

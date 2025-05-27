@@ -49,11 +49,8 @@ async def logout(request: Request, response: Response, redis: Redis) -> None:
         raise MISSING_JWT_TOKEN
     
     payload = verify_jwt_token(token=refresh_token)
-    exp = payload.get('exp')
-    now = int(datetime.now(timezone.utc).timestamp())
-    ttl = exp - now
 
-    await set_token_to_blacklist(redis=redis, token=refresh_token, expire_seconds=ttl)
+    await set_token_to_blacklist(redis=redis, token=refresh_token, payload=payload)
 
     response.delete_cookie(key='access_token')
     response.delete_cookie(key='refresh_token')
@@ -65,7 +62,7 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
         raise MISSING_JWT_TOKEN
     
     if await is_token_to_blacklist(redis=redis, token=refresh_token):
-        raise INVALID_JWT_TOKEN
+        raise USER_ACCOUNT_IS_INACTIVE
 
     payload = verify_jwt_token(token=refresh_token)
     user_id = payload.get('sub')
@@ -80,5 +77,7 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
 
     access_token = create_access_token({'sub': user_id, 'role': user.role}, response)
     create_refresh_token({'sub': user_id}, response)
+
+    await set_token_to_blacklist(redis=redis, token=refresh_token, payload=payload)
 
     return AccessTokenResponseSchema(access_token=access_token)

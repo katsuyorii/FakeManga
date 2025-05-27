@@ -81,9 +81,13 @@ def verify_jwt_token(token: str) -> dict:
     
     return payload
 
-async def set_token_to_blacklist(redis: Redis, token: str, expire_seconds: int) -> None:
-    key = f'bl:{token}'
-    await redis.set(key, 'true', ex=expire_seconds)
+async def set_token_to_blacklist(redis: Redis, token: str, payload: dict) -> None:
+    key = f'blacklist:{token}'
+    expire_token = payload.get('exp')
+    datetime_now = int(datetime.now(timezone.utc).timestamp())
+    ttl = expire_token - datetime_now
+    
+    await redis.set(key, 'true', ex=ttl)
 
 async def is_token_to_blacklist(redis: Redis, token: str) -> bool:
-    return await redis.exists(f'bl:{token}')
+    return await redis.exists(f'blacklist:{token}')
