@@ -62,7 +62,7 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
         raise MISSING_JWT_TOKEN
     
     if await is_token_to_blacklist(redis=redis, token=refresh_token):
-        raise USER_ACCOUNT_IS_INACTIVE
+        raise INVALID_JWT_TOKEN
 
     payload = verify_jwt_token(token=refresh_token)
     user_id = payload.get('sub')
