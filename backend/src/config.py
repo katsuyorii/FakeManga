@@ -7,16 +7,24 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
+    
     REDIS_HOST: str
     REDIS_PORT: str
+
     RABBITMQ_DEFAULT_USER: str
     RABBITMQ_DEFAULT_PASS: str
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
+
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASSWORD: str
     
     @property
     def DATABASE_URL(self) -> str:
