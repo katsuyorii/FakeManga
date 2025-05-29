@@ -104,5 +104,5 @@ def create_verify_email_message(user_id: int) -> str:
 
 def render_verify_email_message_html(token: str) -> str:
     template = env.get_template("verify_email.html")
-    verify_link = f"http://127.0.0.1:8000/auth/verify-email?token={token}"
+    verify_link = f"http://127.0.0.1:8000/auth/email-verify?token={token}"
     return template.render(verify_link=verify_link)

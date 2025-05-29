@@ -7,10 +7,12 @@ INCORRECT_LOGIN_OR_PASSWORD = HTTPException(status_code=status.HTTP_401_UNAUTHOR
 
 USER_ACCOUNT_IS_INACTIVE = HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Учетная запись пользователя неактивна!')
 
+USER_ACCOUNT_IS_MISSING = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Пользователь не найден!')
+
+USER_ACCOUNT_IS_NOT_VERIFY = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Учетная запись пользователя не активирована!')
+
 EXPIRED_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Время действия токена истекло!')
 
 INVALID_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неверный токен!')
 
 MISSING_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Отсутствует refresh токен!')
-
-MISSING_USER = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Пользователь не найден!')

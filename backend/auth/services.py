@@ -8,7 +8,7 @@ from users.models import UserModel
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, AccessTokenResponseSchema
 from .utils import get_user_by_email, get_user_by_id, hashing_password, verify_password, create_access_token, create_refresh_token, verify_jwt_token, set_token_to_blacklist, is_token_to_blacklist, create_verify_email_message
-from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE, MISSING_USER
+from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE, USER_ACCOUNT_IS_MISSING, USER_ACCOUNT_IS_NOT_VERIFY
 from .tasks import send_email_task
 
 
@@ -45,6 +45,9 @@ async def authentication(user_data: UserLoginSchema, response: Response, db: Asy
     if not user.is_active:
         raise USER_ACCOUNT_IS_INACTIVE
     
+    if not user.is_verified:
+        raise USER_ACCOUNT_IS_NOT_VERIFY
+    
     access_token = create_access_token({'sub': str(user.id), 'role': user.role}, response)
     create_refresh_token({'sub': str(user.id)}, response)
 
@@ -78,7 +81,7 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
     user = await get_user_by_id(int(user_id), db)
 
     if not user:
-        raise MISSING_USER
+        raise USER_ACCOUNT_IS_MISSING
     
     if not user.is_active:
         raise USER_ACCOUNT_IS_INACTIVE
@@ -97,7 +100,7 @@ async def verify_email(token: str, db: AsyncSession) -> None:
     user = await get_user_by_id(int(user_id), db)
 
     if not user:
-        raise MISSING_USER
+        raise USER_ACCOUNT_IS_MISSING
 
     if not user.is_active:
         raise USER_ACCOUNT_IS_INACTIVE

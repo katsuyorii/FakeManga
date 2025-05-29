@@ -33,6 +33,6 @@ async def logout_user(request: Request, response: Response, redis: Redis = Depen
 async def refresh_token(request: Request, response: Response, db: AsyncSession = Depends(get_db), redis: Redis = Depends(get_redis)):
     return await refresh(request, response, db, redis)
 
-@auth_router.get('/verify-email')
+@auth_router.get('/email-verify')
 async def verify_email_user(token: str, db: AsyncSession = Depends(get_db)):
     return await verify_email(token, db)
