@@ -24,7 +24,7 @@ class UserModel(BaseModel):
     role: Mapped[UserRoleEnum] = mapped_column(default=UserRoleEnum.USER, index=True)
 
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
-    updated_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"), onupdate=lambda: datetime.now(timezone.utc),)
+    updated_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"), onupdate=datetime.utcnow)
 
     is_active: Mapped[bool] = mapped_column(default=True)
     is_verified: Mapped[bool] = mapped_column(default=False)

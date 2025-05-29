@@ -8,7 +8,7 @@ from users.models import UserModel
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, AccessTokenResponseSchema
 from .utils import get_user_by_email, get_user_by_id, hashing_password, verify_password, create_access_token, create_refresh_token, verify_jwt_token, set_token_to_blacklist, is_token_to_blacklist, create_verify_email_message
-from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE
+from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE, MISSING_USER
 from .tasks import send_email_task
 
 
@@ -78,7 +78,7 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
     user = await get_user_by_id(int(user_id), db)
 
     if not user:
-        raise INVALID_JWT_TOKEN
+        raise MISSING_USER
     
     if not user.is_active:
         raise USER_ACCOUNT_IS_INACTIVE
@@ -89,3 +89,23 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
     await set_token_to_blacklist(redis=redis, token=refresh_token, payload=payload)
 
     return AccessTokenResponseSchema(access_token=access_token)
+
+async def verify_email(token: str, db: AsyncSession) -> None:
+    payload = verify_jwt_token(token=token)
+    user_id = payload.get('sub')
+
+    user = await get_user_by_id(int(user_id), db)
+
+    if not user:
+        raise MISSING_USER
+
+    if not user.is_active:
+        raise USER_ACCOUNT_IS_INACTIVE
+
+    if user.is_verified:
+        return {'message': 'Учетная запись уже активирована!'}
+    
+    user.is_verified = True
+    await db.commit()
+
+    return {'message': 'Учетная запись успешно активирована!'}

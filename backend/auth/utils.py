@@ -97,12 +97,12 @@ async def is_token_to_blacklist(redis: Redis, token: str) -> bool:
     return await redis.exists(f'blacklist:{token}')
 
 def create_verify_email_message(user_id: int) -> str:
-    verify_token = create_jwt_token(payload={'sub': user_id}, expire_delta=timedelta(minutes=settings.EMAIL_VERIFY_EXPIRE_MINUTES))
+    verify_token = create_jwt_token(payload={'sub': str(user_id)}, expire_delta=timedelta(minutes=settings.EMAIL_VERIFY_EXPIRE_MINUTES))
     message = render_verify_email_message_html(verify_token)
 
     return message
 
 def render_verify_email_message_html(token: str) -> str:
     template = env.get_template("verify_email.html")
-    verify_link = f"http://127.0.0.1:8000/verify-email?token={token}"
+    verify_link = f"http://127.0.0.1:8000/auth/verify-email?token={token}"
     return template.render(verify_link=verify_link)

@@ -7,7 +7,7 @@ from redis.asyncio import Redis
 from src.dependencies import get_db, get_redis
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, AccessTokenResponseSchema
-from .services import registration, authentication, logout, refresh
+from .services import registration, authentication, logout, refresh, verify_email
 
 
 auth_router = APIRouter(
@@ -33,16 +33,6 @@ async def logout_user(request: Request, response: Response, redis: Redis = Depen
 async def refresh_token(request: Request, response: Response, db: AsyncSession = Depends(get_db), redis: Redis = Depends(get_redis)):
     return await refresh(request, response, db, redis)
 
-@auth_router.get("/redis/all")
-async def get_all_redis_with_ttl(redis: Redis = Depends(get_redis)):
-    keys = await redis.keys('*')
-    values = await redis.mget(*keys) if keys else []
-
-    result = {}
-    for k, v in zip(keys, values):
-        key_str = k.decode() if isinstance(k, bytes) else str(k)
-        val_str = v.decode() if isinstance(v, bytes) else str(v) if v else None
-        ttl = await redis.ttl(k)  # время жизни в секундах (-1 если без срока, -2 если нет ключа)
-        result[key_str] = {"value": val_str, "ttl": ttl}
-
-    return result
+@auth_router.get('/verify-email')
+async def verify_email_user(token: str, db: AsyncSession = Depends(get_db)):
+    return await verify_email(token, db)

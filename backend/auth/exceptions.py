@@ -12,3 +12,5 @@ EXPIRED_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, deta
 INVALID_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Неверный токен!')
 
 MISSING_JWT_TOKEN = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Отсутствует refresh токен!')
+
+MISSING_USER = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Пользователь не найден!')
