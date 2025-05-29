@@ -12,7 +12,7 @@ async def async_send_email(to_email: str, subject: str, body: str) -> None:
     message["From"] = settings.SMTP_USER
     message["To"] = to_email
     message["Subject"] = subject
-    message.set_content(body)
+    message.add_alternative(body, subtype="html")
 
     await aiosmtplib.send(
         message,

@@ -7,7 +7,7 @@ from redis.asyncio import Redis
 from users.models import UserModel
 
 from .schemas import UserRegistrationSchema, UserLoginSchema, AccessTokenResponseSchema
-from .utils import get_user_by_email, get_user_by_id, hashing_password, verify_password, create_access_token, create_refresh_token, verify_jwt_token, set_token_to_blacklist, is_token_to_blacklist
+from .utils import get_user_by_email, get_user_by_id, hashing_password, verify_password, create_access_token, create_refresh_token, verify_jwt_token, set_token_to_blacklist, is_token_to_blacklist, create_verify_email_message
 from .exceptions import EMAIL_ALREADY_REGISTERED, INCORRECT_LOGIN_OR_PASSWORD, MISSING_JWT_TOKEN, INVALID_JWT_TOKEN, USER_ACCOUNT_IS_INACTIVE
 from .tasks import send_email_task
 
@@ -22,15 +22,19 @@ async def registration(user_data: UserRegistrationSchema, db: AsyncSession) -> N
 
     user_data_dict['password'] = hashing_password(user_data_dict.get('password'))
 
-    send_email_task.delay(
-    user_data_dict.get('email'),
-    "Подтверждение учетной записи",
-    "Спасибо за регистрацию на нашем сайте!"
-    )
-
     new_user = UserModel(**user_data_dict)
 
     db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+
+    message = create_verify_email_message(new_user.id)
+
+    send_email_task.delay(
+    new_user.email,
+    "Подтверждение учетной записи",
+    message
+    )
 
 async def authentication(user_data: UserLoginSchema, response: Response, db: AsyncSession) -> AccessTokenResponseSchema:
     user = await get_user_by_email(user_data.email, db)

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASSWORD: str
+
+    EMAIL_VERIFY_EXPIRE_MINUTES: int
     
     @property
     def DATABASE_URL(self) -> str:
