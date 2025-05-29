@@ -36,6 +36,8 @@ async def registration(user_data: UserRegistrationSchema, db: AsyncSession) -> N
     message
     )
 
+    return {'message': 'Пользователь успешно зарегестрирован в системе!'}
+
 async def authentication(user_data: UserLoginSchema, response: Response, db: AsyncSession) -> AccessTokenResponseSchema:
     user = await get_user_by_email(user_data.email, db)
 
@@ -61,10 +63,12 @@ async def logout(request: Request, response: Response, redis: Redis) -> None:
     
     payload = verify_jwt_token(token=refresh_token)
 
-    await set_token_to_blacklist(redis=redis, token=refresh_token, payload=payload)
+    await set_token_to_blacklist(redis, refresh_token, payload)
 
     response.delete_cookie(key='access_token')
     response.delete_cookie(key='refresh_token')
+
+    return {'message': 'Вы успешно вышли из системы!'}
 
 async def refresh(request: Request, response: Response, db: AsyncSession, redis: Redis) -> AccessTokenResponseSchema:
     refresh_token = request.cookies.get('refresh_token')
@@ -72,13 +76,13 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
     if not refresh_token:
         raise MISSING_JWT_TOKEN
     
-    if await is_token_to_blacklist(redis=redis, token=refresh_token):
+    if await is_token_to_blacklist(redis, refresh_token):
         raise INVALID_JWT_TOKEN
 
-    payload = verify_jwt_token(token=refresh_token)
-    user_id = payload.get('sub')
+    payload = verify_jwt_token(refresh_token)
+    user_id = int(payload.get('sub'))
 
-    user = await get_user_by_id(int(user_id), db)
+    user = await get_user_by_id(user_id, db)
 
     if not user:
         raise USER_ACCOUNT_IS_MISSING
@@ -86,18 +90,18 @@ async def refresh(request: Request, response: Response, db: AsyncSession, redis:
     if not user.is_active:
         raise USER_ACCOUNT_IS_INACTIVE
 
-    access_token = create_access_token({'sub': user_id, 'role': user.role}, response)
-    create_refresh_token({'sub': user_id}, response)
+    access_token = create_access_token({'sub': str(user_id), 'role': user.role}, response)
+    create_refresh_token({'sub': str(user_id)}, response)
 
-    await set_token_to_blacklist(redis=redis, token=refresh_token, payload=payload)
+    await set_token_to_blacklist(redis, refresh_token, payload)
 
     return AccessTokenResponseSchema(access_token=access_token)
 
 async def verify_email(token: str, db: AsyncSession) -> None:
-    payload = verify_jwt_token(token=token)
-    user_id = payload.get('sub')
+    payload = verify_jwt_token(token)
+    user_id = int(payload.get('sub'))
 
-    user = await get_user_by_id(int(user_id), db)
+    user = await get_user_by_id(user_id, db)
 
     if not user:
         raise USER_ACCOUNT_IS_MISSING

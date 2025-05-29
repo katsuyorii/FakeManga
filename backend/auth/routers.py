@@ -17,8 +17,7 @@ auth_router = APIRouter(
 
 @auth_router.post('/registration', status_code=status.HTTP_201_CREATED)
 async def registration_user(user_data: UserRegistrationSchema, db: AsyncSession = Depends(get_db)):
-    await registration(user_data, db)
-    return {'message': 'Пользователь успешно зарегестрирован в системе!'}
+    return await registration(user_data, db)
 
 @auth_router.post('/login', response_model=AccessTokenResponseSchema)
 async def login_user(user_data: UserLoginSchema, response: Response, db: AsyncSession = Depends(get_db)):
@@ -26,8 +25,7 @@ async def login_user(user_data: UserLoginSchema, response: Response, db: AsyncSe
 
 @auth_router.post('/logout')
 async def logout_user(request: Request, response: Response, redis: Redis = Depends(get_redis)):
-    await logout(request, response, redis)
-    return {'message': 'Вы успешно вышли из системы!'}
+    return await logout(request, response, redis)
 
 @auth_router.post('/refresh', response_model=AccessTokenResponseSchema)
 async def refresh_token(request: Request, response: Response, db: AsyncSession = Depends(get_db), redis: Redis = Depends(get_redis)):

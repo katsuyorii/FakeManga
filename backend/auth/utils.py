@@ -40,14 +40,14 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 def create_access_token(payload: dict, response: Response) -> str:
-    access_token = create_jwt_token(payload=payload, expire_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    set_jwt_cookies(response=response, key='access_token', value=access_token, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    access_token = create_jwt_token(payload, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    set_jwt_cookies(response, 'access_token', access_token, settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
 
     return access_token
 
 def create_refresh_token(payload: dict, response: Response) -> str:
-    refresh_token = create_jwt_token(payload=payload, expire_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
-    set_jwt_cookies(response=response, key='refresh_token', value=refresh_token, max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60)
+    refresh_token = create_jwt_token(payload, timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
+    set_jwt_cookies(response, 'refresh_token', refresh_token, settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60)
 
     return refresh_token
 
@@ -105,4 +105,5 @@ def create_verify_email_message(user_id: int) -> str:
 def render_verify_email_message_html(token: str) -> str:
     template = env.get_template("verify_email.html")
     verify_link = f"http://127.0.0.1:8000/auth/email-verify?token={token}"
+    
     return template.render(verify_link=verify_link)
